@@ -3,24 +3,37 @@ const RENDER_EVENT = 'render-books';
 const SAVED_EVENT = 'saved-books';
 const STORAGE_KEY = 'BOOKS-SHELF';
 
-const someCheckbox = document.getElementById('checkSelesai');
-const spanText = document.getElementById('spanText');
-
 document.addEventListener('DOMContentLoaded', () => {
     const submitForm = document.getElementById('bookForm');
     submitForm.addEventListener('submit', (e) => {
         e.preventDefault();
         addBook();
+        resetForm();
     });
-    someCheckbox.addEventListener('change', (e) => {
-        if (e.target.checked === true) {
-            spanText.innerHTML = 'Selesai dibaca';
-        }
-        if (e.target.checked === false) {
-            spanText.innerHTML = 'Belum selesai dibaca';
-        }
+    const checkBox = document.getElementById('checkSelesai');
+    checkBox.addEventListener('change', (ev) => {
+        isChecked(ev);
     });
 });
+
+const isChecked = (ev) => {
+    const spanText = document.getElementById('spanText');
+    if (ev.target.checked === true) {
+        spanText.innerText = 'Selesai dibaca';
+    }
+    if (ev.target.checked === false) {
+        spanText.innerText = 'Belum selesai dibaca';
+    }
+}
+
+const resetForm = () => {
+    const input = document.querySelectorAll('#title, #author, #year');
+    const check = document.getElementById('checkSelesai');
+    input.forEach(input => {
+        input.value = '';
+    });
+    check.checked = false;
+}
 
 const addBook = () => {
     const title = document.getElementById('title').value;
@@ -66,8 +79,8 @@ const makeBook = (bookObject) => {
         trashButton.innerText = 'Hapus buku';
         trashButton.classList.add('red');
 
-        undoButton.addEventListener('click', () => {
-            removeBookFromCompleted(id);
+        trashButton.addEventListener('click', () => {
+            removeBook(id);
         });
 
         const actionButton = document.createElement('div');
@@ -89,7 +102,7 @@ const makeBook = (bookObject) => {
         trashButton.classList.add('red');
 
         trashButton.addEventListener('click', () => {
-            removeBookFromUncompleted(id);
+            removeBook(id);
         });
 
         const actionButton = document.createElement('div');
@@ -98,7 +111,6 @@ const makeBook = (bookObject) => {
         actionButton.append(checkButton, trashButton);
         container.append(actionButton);
     }
-
     return container;
 }
 
@@ -128,16 +140,8 @@ const undoBookFromCompleted = (bookId) => {
     document.dispatchEvent(new Event(RENDER_EVENT));
 }
 
-const removeBookFromCompleted = (bookId) => {
-    const bookTarget = findBook(bookId);
-    if (bookTarget === -1) return;
-
-    books.splice(bookTarget, 1);
-    document.dispatchEvent(new Event(RENDER_EVENT));
-}
-
-const removeBookFromUncompleted = (bookId) => {
-    const bookTarget = findBook(bookId);
+const removeBook = (bookId) => {
+    const bookTarget = findBookIndex(bookId);
     if (bookTarget === -1) return;
 
     books.splice(bookTarget, 1);
@@ -158,7 +162,7 @@ const findBook = (bookId) => {
     return null;
 }
 
-document.addEventListener(RENDER_EVENT, () => {
+const renderBooks = () => {
     const incompleteBookshelfList = document.getElementById('incompleteBookshelfList');
     incompleteBookshelfList.innerHTML = '';
 
@@ -174,4 +178,8 @@ document.addEventListener(RENDER_EVENT, () => {
             completeBookshelfList.append(bookElement);
         }
     }
+}
+
+document.addEventListener(RENDER_EVENT, () => {
+    renderBooks();
 });
