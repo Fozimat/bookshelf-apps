@@ -14,7 +14,38 @@ document.addEventListener('DOMContentLoaded', () => {
     checkBox.addEventListener('change', (ev) => {
         isChecked(ev);
     });
+    if (isStorageExist()) {
+        loadBookFromStorage();
+    }
 });
+
+const saveBook = () => {
+    if (isStorageExist()) {
+        const parsed = JSON.stringify(books);
+        localStorage.setItem(STORAGE_KEY, parsed);
+        document.dispatchEvent(new Event(SAVED_EVENT));
+    }
+}
+
+const isStorageExist = () => {
+    if (typeof (Storage) === undefined) {
+        alert("Browser tidak mendukung");
+        return false;
+    }
+    return true;
+}
+
+const loadBookFromStorage = () => {
+    const serializedData = localStorage.getItem(STORAGE_KEY);
+    let data = JSON.parse(serializedData);
+
+    if (data != null) {
+        for (const book of data) {
+            books.push(book);
+        }
+    }
+    document.dispatchEvent(new Event(RENDER_EVENT));
+}
 
 const isChecked = (ev) => {
     const spanText = document.getElementById('spanText');
@@ -46,6 +77,8 @@ const addBook = () => {
     books.push(bookObject);
     alertBox('ditambahkan');
     document.dispatchEvent(new Event(RENDER_EVENT));
+
+    saveBook();
 }
 
 const alertBox = (pesan) => {
@@ -133,6 +166,8 @@ const addBookCompleted = (bookId) => {
 
     alertBox('ditandai selesai dibaca');
     document.dispatchEvent(new Event(RENDER_EVENT));
+
+    saveBook();
 }
 
 const undoBookFromCompleted = (bookId) => {
@@ -144,6 +179,8 @@ const undoBookFromCompleted = (bookId) => {
     alertBox('ditandai belum dibaca');
 
     document.dispatchEvent(new Event(RENDER_EVENT));
+
+    saveBook();
 }
 
 const removeBook = (bookId) => {
@@ -156,6 +193,8 @@ const removeBook = (bookId) => {
         alertBox('dihapus');
     }
     document.dispatchEvent(new Event(RENDER_EVENT));
+
+    saveBook();
 }
 
 const findBookIndex = (bookId) => {
@@ -192,3 +231,7 @@ const renderBooks = () => {
 document.addEventListener(RENDER_EVENT, () => {
     renderBooks();
 });
+
+document.addEventListener(SAVED_EVENT, () => {
+    console.log(localStorage.getItem(STORAGE_KEY));
+})
