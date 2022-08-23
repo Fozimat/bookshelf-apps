@@ -44,8 +44,12 @@ const addBook = () => {
     const generateID = generateId();
     const bookObject = generateBookObject(generateID, title, author, year, isCompleted);
     books.push(bookObject);
-
+    alertBox('ditambahkan');
     document.dispatchEvent(new Event(RENDER_EVENT));
+}
+
+const alertBox = (pesan) => {
+    alert(`Buku berhasil ${pesan}`);
 }
 
 const makeBook = (bookObject) => {
@@ -124,10 +128,10 @@ const generateBookObject = (id, title, author, year, isCompleted) => {
 
 const addBookCompleted = (bookId) => {
     const bookTarget = findBook(bookId);
-
     if (bookTarget == null) return;
-
     bookTarget.isCompleted = true;
+
+    alertBox('ditandai selesai dibaca');
     document.dispatchEvent(new Event(RENDER_EVENT));
 }
 
@@ -137,14 +141,20 @@ const undoBookFromCompleted = (bookId) => {
     if (bookTarget == null) return;
 
     bookTarget.isCompleted = false;
+    alertBox('ditandai belum dibaca');
+
     document.dispatchEvent(new Event(RENDER_EVENT));
 }
 
 const removeBook = (bookId) => {
     const bookTarget = findBookIndex(bookId);
     if (bookTarget === -1) return;
-
-    books.splice(bookTarget, 1);
+    const remove = confirm('Apakah anda yakin ingin menghapus buku?');
+    if (remove) {
+        books.splice(bookTarget, 1);
+        document.dispatchEvent(new Event(RENDER_EVENT));
+        alertBox('dihapus');
+    }
     document.dispatchEvent(new Event(RENDER_EVENT));
 }
 
@@ -170,7 +180,6 @@ const renderBooks = () => {
     completeBookshelfList.innerHTML = '';
 
     for (const bookItem of books) {
-        console.log(bookItem);
         const bookElement = makeBook(bookItem);
         if (!bookItem.isCompleted) {
             incompleteBookshelfList.append(bookElement);
