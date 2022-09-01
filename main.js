@@ -10,14 +10,34 @@ document.addEventListener('DOMContentLoaded', () => {
         addBook();
         resetForm();
     });
+
     const checkBox = document.getElementById('checkSelesai');
     checkBox.addEventListener('change', (ev) => {
         isChecked(ev);
     });
+
     if (isStorageExist()) {
         loadBookFromStorage();
     }
+
+    const searchSubmit = document.getElementById('searchSubmit');
+    searchSubmit.addEventListener('click', (ev) => {
+        ev.preventDefault();
+        searchBook();
+    });
 });
+
+const searchBook = () => {
+    const searchBook = document.getElementById('searchBookTitle').value.toLowerCase();
+    const bookList = document.querySelectorAll('.book_item > h3');
+    for (const book of bookList) {
+        if (book.innerText.toLowerCase().includes(searchBook)) {
+            book.parentElement.style.display = "block";
+        } else {
+            book.parentElement.style.display = "none";
+        }
+    }
+}
 
 const saveBook = () => {
     if (isStorageExist()) {
@@ -60,10 +80,15 @@ const isChecked = (ev) => {
 const resetForm = () => {
     const input = document.querySelectorAll('#title, #author, #year');
     const check = document.getElementById('checkSelesai');
+    const cari = document.getElementById('searchBookTitle');
+    const spanText = document.getElementById('spanText');
+
     input.forEach(input => {
         input.value = '';
     });
     check.checked = false;
+    cari.value = '';
+    spanText.innerText = 'Belum selesai dibaca';
 }
 
 const addBook = () => {
@@ -231,7 +256,3 @@ const renderBooks = () => {
 document.addEventListener(RENDER_EVENT, () => {
     renderBooks();
 });
-
-document.addEventListener(SAVED_EVENT, () => {
-    console.log(localStorage.getItem(STORAGE_KEY));
-})
